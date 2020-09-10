@@ -1,0 +1,254 @@
+---
+title: "Causal Inference"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(ggdag)
+coordLV <- list(
+  x = c(sex = 0, age = 0, smoke = 1, height = 2, fev = 3),
+  y = c(sex = 1, age = 2, smoke = 0, height = 2, fev = 0))
+dagLV <- dagify(height ~ sex + age + smoke,
+                smoke ~ sex + age,
+                fev ~ height + sex + age + smoke,
+                coords = coordLV,
+                exposure = "smoke",
+                outcome = "fev")
+p1 <- ggdag(dagLV, text_col = "blue", node = FALSE, text_size = 5) + theme_dag_blank()
+
+
+library(learnr)
+library(tidyverse)
+library(mosaic)
+
+FEV <- read.table('http://jse.amstat.org/datasets/fev.dat.txt')
+colnames(FEV) <- c("age", "fev", "height", "sex", "smoke")
+FEV <- as.tibble(FEV)
+
+checker <- function(label, user_code, check_code, envir_result, evaluate_result, ...) {
+  list(message = check_code, correct = TRUE, location = "append")
+}
+tutorial_options(exercise.timelimit = 60, exercise.checker = checker)
+```
+
+## Vorbemerkung
+
+Dieses Tutorial orientiert sich am Projekt [Causal Inference in Introductory Statistics Courses](https://github.com/kfcaby/causalLab) von [LTC Kevin Cummiskey](https://westpoint.edu/mathematical-sciences/profile/kevin_cummiskey). Siehe auch Cummiskey, K., Adams, B,. Pleuss, J.,  Turner, D., Clark, N. \& Watts, K. (2020). *Causal Inference in Introductory Statistics Courses*, Journal of Statistics Education, [https://doi.org/10.1080/10691898.2020.1713936](https://doi.org/10.1080/10691898.2020.1713936).
+
+Datengrundlage ist der Artikel von Kahn, M. (2005). *An exhalent problem for teaching statistics*. Journal of Statistics Education, 13(2), [https://doi.org/10.1080/10691898.2005.11910559](https://doi.org/10.1080/10691898.2005.11910559).
+
+## Rauchen bei Kindern und Jugendlichen
+
+Mittlerweile sind wir ziemlich sicher, dass Rauchen der Gesundheit schadet. Aber das war nicht immer so, und eine naive Datenanalyse kann auch zu einem gegenteiligen Ergebnis kommen.
+
+In einer Reihe von Papern (siehe z.B. [Kahn, 2005](https://doi.org/10.1080/10691898.2005.11910559)) wurde der Frage nachgegangen inwieweit Rauchen das sogenannte *forcierte exspiratorische Volumen* -- eine Kennzahl der Lungenfunktion -- bei Heranwachsenden beeinflusst.
+
+###
+
+
+```{r ethik, echo=FALSE}
+question("Ist hier ein randomisiertes Experiment ethisch vertretbar?",
+  answer("Ja.", message = "Falsch: es können negative Folgen bei den Teilnehmer\\*innen, die im Experiment den Raucher\\*innen zugeordnet werden, befürchtet werden."),
+  answer("Nein.", correct = TRUE, message = "Richtig: negative Konsequenzen sind für die Raucher\\*innen zu erwarten.")
+)
+```
+
+
+###
+
+Der hier verwendete Datensatz `FEV` hat folgende Struktur:
+
+```{r str}
+str(FEV)
+```
+
+mit den Variablen
+
+- `age`: age in Jahren
+- `fev`: forcierte exspiratorische Volumen in l
+- `height`: Größe in cm
+- `sex`: `m` für männlich und `w` für weiblich
+- `smoke`: Hat die Person geraucht? `ja` oder `nein`
+
+Übersicht der ersten Werte:
+
+```{r head}
+head(FEV)
+```
+
+
+```{r skalennvieau, echo=FALSE}
+question("Welches Skalenniveau hat die Variable `fev`?",
+  answer("Kategorial - nominal", message = "Falsch: Die Werte können nicht nur unterschieden werden, es gibt auch eine Reihenfolge, Abstände und einen natürlichen Nullpunkt."),
+  answer("Kategorial - ordinal", message = "Falsch: Die Werte können nicht nur unterschieden und in eine Reihenfolge gebracht werden. Es gibt auch natürliche Abstände und einen natürlichen Nullpunkt."), 
+    answer("Numerisch - intervall", message = "Falsch: Die Werte können nicht nur unterschieden und in eine Reihenfolge mit natürlichen Abständen gebracht werden. Es gibt auch einen natürlichen Nullpunkt."), 
+    answer("Numerisch - verhältnis", correct=TRUE, message = "Richtig: Die Werte können unterschieden werden, es gibt eine natürliche Ordnung. Auch können die Abstände verglichen werden und es gibt einen absoluten Nullpunkt.")
+)
+```
+
+###
+
+Aus inhaltlichen Gründen wird dabei folgender Kausalzusammenhang angenommen:
+
+```{r p1, echo=FALSE}
+p1
+```
+
+*Tip*: [DAGitty](http://dagitty.net/) and [ggdag](https://ggdag.netlify.app/) are nice tools to draw directed acyclic graphs.
+
+## Rauchen und fev
+
+Ein Boxplot des fevs in Abhängigkeit des Rauchverhaltens ergibt folgendes Ergebnis:
+
+```{r b1}
+gf_boxplot(fev ~ smoke, data = FEV)
+```
+
+###
+
+```{r median, echo=FALSE}
+question("Welche Gruppe hat im Median das größere fev?",
+  answer("Die Nichtraucher.", message = "Falsch: während der Median bei den Nichtraucher\\*innen bei ca. 2.5 l liegt, liegt er bei den Raucher\\*innen bei ca. 3.2 l."),
+  answer("Die Raucher.", correct = TRUE, message = "Richtig: während der Median bei den Nichtraucher\\*innen bei ca. 2.5 l liegt, liegt er bei den Raucher\\*innen bei ca. 3.2 l.")
+)
+```
+
+###
+
+Sowohl Rauchen als auch fev hängen vom sex ab. 
+
+Erweitern Sie den Code, so dass Sie nach `sex` bedingen/ filtern.
+
+```{r bedingt, exercise = TRUE}
+gf_boxplot(fev ~ smoke, data = FEV)
+```
+
+```{r bedingt-solution}
+gf_boxplot(fev ~ smoke | sex, data = FEV)
+```
+
+###
+
+Das Bild hat sich nicht geändert, Raucher\*innen scheinen das größere fev zu haben.
+
+###
+
+Woran könnte das liegen?
+
+## Das age ...
+
+Wie zu erwarten war, gibt es einen Zusammenhang zwischen age und Größe:
+
+```{r }
+gf_point(height ~ age, data = FEV) %>%
+  gf_smooth()
+```
+
+###
+
+Erweitern Sie den Code so, so dass Sie die Punkte gemäß der Variable `smoke` farbig markieren:
+
+```{r color, exercise = TRUE}
+gf_point(height ~ age, data = FEV) %>%
+  gf_smooth()
+```
+
+```{r color-solution}
+gf_point(height ~ age, color = ~ smoke, data = FEV) %>%
+  gf_smooth()
+```
+
+###
+
+Klar: Bei Heranwachsenden sind die Raucher\*innen älter als die Nichtraucher\*innen -- und damit auch größer.
+
+###
+
+Und natürlich gibt es auch einen Zusammenhang zwischen der Größe und dem fev:
+
+```{r}
+gf_point(fev ~ height, data = FEV) %>%
+  gf_smooth()
+```
+
+## Kausale Modellierung Rauchen und fev 
+
+Hier noch einmal das angenommene Modell:
+
+```{r p12, echo = FALSE}
+p1
+```
+
+
+
+Eine naive Modellierung ergibt folgendes Ergebnis:
+
+```{r}
+lm(fev ~ smoke, data = FEV) %>%
+  summary()
+```
+
+### 
+
+Rauchen *scheint* das fev zu erhöhen.
+
+Warum?
+
+###
+
+Weil die nicht-kausalen Pfade durch die *Hintertür* (engl. backdoor, *Fork*) offen sind:
+
+$$\text{smoke} \leftarrow \text{sex} \rightarrow \text{fev}$$
+bzw.
+
+$$\text{smoke} \leftarrow \text{age} \rightarrow \text{fev}$$
+Diese Pfade sollten also z.B. durch Adjustierung *blockiert* werden.
+
+
+```{r chain, echo=FALSE}
+question("Sollte über die Variable `height` adjustiert werden?",
+  answer("Ja.", message = "Falsch: die Variable `height` liegt auf dem kausalen Pfad (*Chain*) zwischen `smoke` und `fev` (Mediator)"),
+  answer("Nein.", correct = TRUE, message = "Richtig: die Variable `height` liegt auf dem kausalen Pfad (*Chain*) zwischen `smoke` und `fev` (Mediator).")
+)
+```
+
+###
+
+Geben Sie, unter der Annahme eines linearen Modells die Formel an, die den (totalen) kausalen Effekt des Rauchens auf das fev schätzt:
+
+```{r model, exercise = TRUE, eval=FALSE}
+lm(fev ~ smoke + ___ + ___, data = FEV) %>%
+  summary()
+```
+
+```{r model-solution}
+lm(fev ~ smoke + sex + age, data = FEV) %>%
+  summary()
+```
+
+###
+
+```{r effekt, echo=FALSE}
+question("Hat in dem Modell Rauchen einen negativen Effekt auf das fev?",
+  answer("Ja.", correct = TRUE, message = "Richtig: der geschätzte Koeffizient ist mit $-0.153974$ negativ (`Estimate` für die Variable `smokeja `)."),
+  answer("Nein.", message = "Falsch: der geschätzte Koeffizient ist mit $-0.153974$ negativ (`Estimate` für die Variable `smokeja `).")
+)
+```
+
+###
+
+```{r pwert, echo=FALSE}
+question("Wäre der geschätzte Effekt von ($\\hat{\\beta}_{\\text{smokeja}}=-0.153974$) plausibel, wenn es gar keinen geben würde ($H_0: {\\beta}_{\\text{smokeja}}=0$)?",
+  answer("Ja.", message = "Falsch: nicht besonders: die Wahrscheinlichkeit in dem Modell ${\\beta}_{\\text{smokeja}}=0$ einen mindestens so großen Wert wie $\\hat{\\beta}_{\\text{smokeja}}=-0.153974$ in einer Stichprobe zu beobachten liegt bei 0.0487 (p-Wert, siehe `Pr(>|t|)`."),
+  answer("Nein.", correct = TRUE, message = "Richtig: die Wahrscheinlichkeit in dem Modell ${\\beta}_{\\text{smokeja}}=0$ einen mindestens so großen Wert wie $\\hat{\\beta}_{\\text{smokeja}}=-0.153974$ in einer Stichprobe zu beobachten liegt bei 0.0487 (p-Wert, siehe `Pr(>|t|)`.")
+)
+```
+
+*Hinweis*: Die Annahme eines linearen Modells ist aufgrund des nicht-linearen Zusammenhangs zwischen age und Größe sowie Größe und fev (siehe Abbildungen im Abschnitt *Das age ...*) eher nur eine Näherung.
+
+## Ausblick
+
+Die Kausale Inferenz bietet viele weitere und fortgeschrittene Möglichkeiten der Analyse. Siehe z.B. als Einstieg: Pearl, J., Glymour, M., \& Jewell, N. P. (2016). *Causal inference in statistics: A primer*. John Wiley \& Sons, [http://bayes.cs.ucla.edu/PRIMER/](http://bayes.cs.ucla.edu/PRIMER/).

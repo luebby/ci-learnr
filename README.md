@@ -1,4 +1,4 @@
-[learnr Tutorial](https://rstudio.github.io/learnr/) for the paper [Lübke, K., Gehrke, M., Horst, J. & Szepannek, G. (2020). Why We Should Teach Causal Inference: Examples in Linear Regression with Simulated Data, Journal of Statistics Education.](https://doi.org/10.1080/10691898.2020.1752859) based on [Causal Inference in Introductory Statistics Courses](https://github.com/kfcaby/causalLab).
+[learnr Tutorial](https://rstudio.github.io/learnr/) to the paper [Lübke, K., Gehrke, M., Horst, J. & Szepannek, G. (2020). Why We Should Teach Causal Inference: Examples in Linear Regression with Simulated Data, Journal of Statistics Education.](https://doi.org/10.1080/10691898.2020.1752859) based on [Causal Inference in Introductory Statistics Courses](https://github.com/kfcaby/causalLab).
 
 ---
 
