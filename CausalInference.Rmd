@@ -27,6 +27,9 @@ library(mosaic)
 FEV <- read.table('http://jse.amstat.org/datasets/fev.dat.txt')
 colnames(FEV) <- c("age", "fev", "height", "sex", "smoke")
 FEV <- as.tibble(FEV)
+FEV <- FEV %>%
+  mutate(sex = ifelse(!sex, "female", "male")) %>%
+  mutate(smoke = ifelse(!smoke, "no", "yes"))
 
 checker <- function(label, user_code, check_code, envir_result, evaluate_result, ...) {
   list(message = check_code, correct = TRUE, location = "append")
@@ -34,46 +37,49 @@ checker <- function(label, user_code, check_code, envir_result, evaluate_result,
 tutorial_options(exercise.timelimit = 60, exercise.checker = checker)
 ```
 
-## Vorbemerkung
+## Preliminaries
 
-Dieses Tutorial orientiert sich am Projekt [Causal Inference in Introductory Statistics Courses](https://github.com/kfcaby/causalLab) von [LTC Kevin Cummiskey](https://westpoint.edu/mathematical-sciences/profile/kevin_cummiskey). Siehe auch Cummiskey, K., Adams, B,. Pleuss, J.,  Turner, D., Clark, N. \& Watts, K. (2020). *Causal Inference in Introductory Statistics Courses*, Journal of Statistics Education, [https://doi.org/10.1080/10691898.2020.1713936](https://doi.org/10.1080/10691898.2020.1713936).
+This tutorial is based on [Causal Inference in Introductory Statistics Courses](https://github.com/kfcaby/causalLab) of [LTC Kevin Cummiskey](https://westpoint.edu/mathematical-sciences/profile/kevin_cummiskey), see Cummiskey, K., Adams, B,. Pleuss, J.,  Turner, D., Clark, N. \& Watts, K. (2020). *Causal Inference in Introductory Statistics Courses*, Journal of Statistics Education, [https://doi.org/10.1080/10691898.2020.1713936](https://doi.org/10.1080/10691898.2020.1713936).
 
-Datengrundlage ist der Artikel von Kahn, M. (2005). *An exhalent problem for teaching statistics*. Journal of Statistics Education, 13(2), [https://doi.org/10.1080/10691898.2005.11910559](https://doi.org/10.1080/10691898.2005.11910559).
+Data is taken from Kahn, M. (2005). *An exhalent problem for teaching statistics*. Journal of Statistics Education, 13(2), [https://doi.org/10.1080/10691898.2005.11910559](https://doi.org/10.1080/10691898.2005.11910559).
 
-## Rauchen bei Kindern und Jugendlichen
+<br>
 
-Mittlerweile sind wir ziemlich sicher, dass Rauchen der Gesundheit schadet. Aber das war nicht immer so, und eine naive Datenanalyse kann auch zu einem gegenteiligen Ergebnis kommen.
+*Note*: The R packages [mosaic](https://projectmosaic.github.io/mosaic/) with [ggformula](https://projectmosaic.github.io/ggformula/) are used for data analysis.
 
-In einer Reihe von Papern (siehe z.B. [Kahn, 2005](https://doi.org/10.1080/10691898.2005.11910559)) wurde der Frage nachgegangen inwieweit Rauchen das sogenannte *forcierte exspiratorische Volumen* -- eine Kennzahl der Lungenfunktion -- bei Heranwachsenden beeinflusst.
+## Youth smoking
+
+Nowadays we are sure that smoking is harmful. But this was not always clear and a naive data analysis may come to the opposite conclusion. 
+
+
+In a series of papers (e.g. [Kahn, 2005](https://doi.org/10.1080/10691898.2005.11910559)) the question was analyzed if chidlhood smoking has an effect on  *forced expiratory volume*,  common measure of lung function.
 
 ###
 
 
 ```{r ethik, echo=FALSE}
-question("Ist hier ein randomisiertes Experiment ethisch vertretbar?",
-  answer("Ja.", message = "Falsch: es können negative Folgen bei den Teilnehmer\\*innen, die im Experiment den Raucher\\*innen zugeordnet werden, befürchtet werden."),
-  answer("Nein.", correct = TRUE, message = "Richtig: negative Konsequenzen sind für die Raucher\\*innen zu erwarten.")
+question("Is it ethical here to conduct a randomized experiment?",
+  answer("Yes.", message = "Negeative consequences of smoking can be expected."),
+  answer("No.", correct = TRUE, message = "Negeative consequences of smoking can be expected.")
 )
 ```
 
 
 ###
 
-Der hier verwendete Datensatz `FEV` hat folgende Struktur:
+The data set `FEV` has the following structure:
 
 ```{r str}
 str(FEV)
 ```
 
-mit den Variablen
+with variables
 
-- `age`: age in Jahren
-- `fev`: forcierte exspiratorische Volumen in l
-- `height`: Größe in cm
-- `sex`: `m` für männlich und `w` für weiblich
-- `smoke`: Hat die Person geraucht? `ja` oder `nein`
-
-Übersicht der ersten Werte:
+- `age`: the age of the subject in years
+- `fev`: forced expiratory volume (L)
+- `height`: the height of the subject in inches
+- `sex`: biological sex of the subject
+- `smoke`: whether the subject had ever smoked or no
 
 ```{r head}
 head(FEV)
@@ -81,23 +87,23 @@ head(FEV)
 
 
 ```{r skalennvieau, echo=FALSE}
-question("Welches Skalenniveau hat die Variable `fev`?",
-  answer("Kategorial - nominal", message = "Falsch: Die Werte können nicht nur unterschieden werden, es gibt auch eine Reihenfolge, Abstände und einen natürlichen Nullpunkt."),
-  answer("Kategorial - ordinal", message = "Falsch: Die Werte können nicht nur unterschieden und in eine Reihenfolge gebracht werden. Es gibt auch natürliche Abstände und einen natürlichen Nullpunkt."), 
-    answer("Numerisch - intervall", message = "Falsch: Die Werte können nicht nur unterschieden und in eine Reihenfolge mit natürlichen Abständen gebracht werden. Es gibt auch einen natürlichen Nullpunkt."), 
-    answer("Numerisch - verhältnis", correct=TRUE, message = "Richtig: Die Werte können unterschieden werden, es gibt eine natürliche Ordnung. Auch können die Abstände verglichen werden und es gibt einen absoluten Nullpunkt.")
+question("Which measurement scale is `fev`?",
+  answer("Nominal", message = "Values can be distinguished, ordered and differences as well as ratios are meaningful."),
+  answer("Ordinal", message = "Values can be distinguished, ordered and differences as well as ratios are meaningful."), 
+    answer("Interval", message = "Values can be distinguished, ordered and differences as well as ratios are meaningful."), 
+    answer("Ratio", correct=TRUE, message = "Values can be distinguished, ordered and differences as well as ratios are meaningful.")
 )
 ```
 
 ###
 
-Aus inhaltlichen Gründen wird dabei folgender Kausalzusammenhang angenommen:
+The following causal structure is assumed:
 
 ```{r p1, echo=FALSE}
 p1
 ```
 
-*Tip*: [DAGitty](http://dagitty.net/) and [ggdag](https://ggdag.netlify.app/) are nice tools to draw directed acyclic graphs.
+*Tip*: [DAGitty](http://dagitty.net/) and [ggdag](https://ggdag.netlify.app/) are nice tools for drawing and analyzing directed acyclic graphs.
 
 ## Rauchen und fev
 
