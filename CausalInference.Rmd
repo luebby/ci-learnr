@@ -288,7 +288,7 @@ As Kari Lock Morgan puts it [here](https://askgoodquestions.blog/2020/07/27/56-q
 
 For the date in this tutorial the smoking and non-smoking group differ by e.g. age. Therefor the naive comparison was flawed.
 
-The rather low p-value in the parametric hypothesis test of ${\beta}_{\text{smokeyes}}=0$ gives as (weak) evidence against just random chance. 
+The rather low p-value in the hypothesis test of ${\beta}_{\text{smokeyes}}=0$ gives as (weak) evidence against just random chance. 
 
 <br>
 
