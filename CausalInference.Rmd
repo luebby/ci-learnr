@@ -217,7 +217,7 @@ and
 
 $$\text{smoke} \leftarrow \text{age} \rightarrow \text{fev}$$
 
-Here `age` is in the middle of af a *fork*.
+Here age is in the middle of af a *fork*.
 
 These paths should be blocked by means of e.g. adjusting.
 
@@ -261,6 +261,19 @@ question("Is the estimate ($\\hat{\\beta}_{\\text{smokeyes}}=-0.153974$) compati
 ```
 
 *Note*: The assumption of a linear model is due to the non-linear association between age and height as well as height and forced expiratory volume a questionable approximation.
+
+### Simulation based inference
+
+That the observed effect in the data is uncommon if the forced expiratory volume is independent of smoking can also be seen by a permutation test. Simulation based inference, i.e. simulating the distribution of $\hat{\beta}_{\text{smokeyes}}$ while shuffling smoke:
+
+```{r permute, warning=FALSE , exercise = TRUE}
+set.seed(1896)
+
+Nulldist <- do(1000) * lm(fev ~ shuffle(smoke) + sex + age, data = FEV)
+
+gf_histogram( ~ smokeyes, data = Nulldist, center = 0, bins = 21) %>%
+  gf_vline(xintercept = -0.153974)
+```
 
 
 ## Summary
