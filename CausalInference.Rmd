@@ -26,7 +26,7 @@ library(mosaic)
 
 FEV <- read.table('http://jse.amstat.org/datasets/fev.dat.txt')
 colnames(FEV) <- c("age", "fev", "height", "sex", "smoke")
-FEV <- as.tibble(FEV)
+FEV <- as_tibble(FEV)
 FEV <- FEV %>%
   mutate(sex = ifelse(!sex, "female", "male")) %>%
   mutate(smoke = ifelse(!smoke, "no", "yes"))
@@ -91,7 +91,7 @@ head(FEV)
 
 
 ```{r skalennvieau, echo=FALSE}
-question("Which measurement scale is `fev`?",
+question("What is the measurement scale of `fev`?",
   answer("Nominal", message = "Values can be distinguished, ordered and differences as well as ratios are meaningful."),
   answer("Ordinal", message = "Values can be distinguished, ordered and differences as well as ratios are meaningful."), 
     answer("Interval", message = "Values can be distinguished, ordered and differences as well as ratios are meaningful."), 
@@ -150,7 +150,7 @@ Why?
 
 ## Age ...
 
-Wie zu erwarten war, gibt es einen Zusammenhang zwischen age und Größe:
+Thinking about the data: height is associated with age:
 
 ```{r }
 gf_point(height ~ age, data = FEV) %>%
@@ -159,7 +159,7 @@ gf_point(height ~ age, data = FEV) %>%
 
 ###
 
-Erweitern Sie den Code so, so dass Sie die Punkte gemäß der Variable `smoke` farbig markieren:
+Expand the code to color the points by `smoke`:
 
 ```{r color, exercise = TRUE}
 gf_point(height ~ age, data = FEV) %>%
@@ -173,20 +173,20 @@ gf_point(height ~ age, color = ~ smoke, data = FEV) %>%
 
 ###
 
-Klar: Bei Heranwachsenden sind die Raucher\*innen älter als die Nichtraucher\*innen -- und damit auch größer.
+In childhood smoking: those who smoke are older than than those who don't -- and also taller.
 
 ###
 
-Und natürlich gibt es auch einen Zusammenhang zwischen der Größe und dem fev:
+And of course there is an association between height and forced expiratory volume.
 
 ```{r}
 gf_point(fev ~ height, data = FEV) %>%
   gf_smooth()
 ```
 
-## Kausale Modellierung Rauchen und fev 
+## Causal inference 
 
-Hier noch einmal das angenommene Modell:
+The assumed causal model of the data generating process is:
 
 ```{r p12, echo = FALSE}
 p1
@@ -194,7 +194,7 @@ p1
 
 
 
-Eine naive Modellierung ergibt folgendes Ergebnis:
+A naive modeling of forced expiratory volume by smoking gives the following result:
 
 ```{r}
 lm(fev ~ smoke, data = FEV) %>%
@@ -203,31 +203,34 @@ lm(fev ~ smoke, data = FEV) %>%
 
 ### 
 
-Rauchen *scheint* das fev zu erhöhen.
+Smoking seems to increase the forced expiratory volume ...
 
-Warum?
+Why?
 
 ###
 
-Weil die nicht-kausalen Pfade durch die *Hintertür* (engl. backdoor, *Fork*) offen sind:
+Because the non-causal *backdoor* path are open:
 
 $$\text{smoke} \leftarrow \text{sex} \rightarrow \text{fev}$$
-bzw.
+
+and
 
 $$\text{smoke} \leftarrow \text{age} \rightarrow \text{fev}$$
-Diese Pfade sollten also z.B. durch Adjustierung *blockiert* werden.
 
+Here `age` is in the middle of af a *fork*.
+
+These paths should be blocked by means of e.g. adjusting.
 
 ```{r chain, echo=FALSE}
-question("Sollte über die Variable `height` adjustiert werden?",
-  answer("Ja.", message = "Falsch: die Variable `height` liegt auf dem kausalen Pfad (*Chain*) zwischen `smoke` und `fev` (Mediator)"),
-  answer("Nein.", correct = TRUE, message = "Richtig: die Variable `height` liegt auf dem kausalen Pfad (*Chain*) zwischen `smoke` und `fev` (Mediator).")
+question("Should we adjust also `height`?",
+  answer("Yes.", message = "`height` is on the causal path between `smoke` and `fev` (Mediator in a *chain*)."),
+  answer("No.", correct = TRUE, message = "`height` is on the causal path between `smoke` and `fev` (Mediator in a *chain*).")
 )
 ```
 
 ###
 
-Geben Sie, unter der Annahme eines linearen Modells die Formel an, die den (totalen) kausalen Effekt des Rauchens auf das fev schätzt:
+Give a formula which would allow to estimate the total causal effect of smoking on forced expiratory volume under the assumption that a parametric linear model applies: 
 
 ```{r model, exercise = TRUE, eval=FALSE}
 lm(fev ~ smoke + ___ + ___, data = FEV) %>%
@@ -242,23 +245,44 @@ lm(fev ~ smoke + sex + age, data = FEV) %>%
 ###
 
 ```{r effekt, echo=FALSE}
-question("Hat in dem Modell Rauchen einen negativen Effekt auf das fev?",
-  answer("Ja.", correct = TRUE, message = "Richtig: der geschätzte Koeffizient ist mit $-0.153974$ negativ (`Estimate` für die Variable `smokeja `)."),
-  answer("Nein.", message = "Falsch: der geschätzte Koeffizient ist mit $-0.153974$ negativ (`Estimate` für die Variable `smokeja `).")
+question("Has smoking a negative total causal effect on the forced expiratory volume?",
+  answer("Ja.", correct = TRUE, message = "The estimated coefficient is negative: $-0.153974$ (`Estimate` for `smokeyes`)."),
+  answer("Nein.", message = "The estimated coefficient is negative: $-0.153974$ (`Estimate` for `smokeyes`).")
 )
 ```
 
 ###
 
 ```{r pwert, echo=FALSE}
-question("Wäre der geschätzte Effekt von ($\\hat{\\beta}_{\\text{smokeja}}=-0.153974$) plausibel, wenn es gar keinen geben würde ($H_0: {\\beta}_{\\text{smokeja}}=0$)?",
-  answer("Ja.", message = "Falsch: nicht besonders: die Wahrscheinlichkeit in dem Modell ${\\beta}_{\\text{smokeja}}=0$ einen mindestens so großen Wert wie $\\hat{\\beta}_{\\text{smokeja}}=-0.153974$ in einer Stichprobe zu beobachten liegt bei 0.0487 (p-Wert, siehe `Pr(>|t|)`."),
-  answer("Nein.", correct = TRUE, message = "Richtig: die Wahrscheinlichkeit in dem Modell ${\\beta}_{\\text{smokeja}}=0$ einen mindestens so großen Wert wie $\\hat{\\beta}_{\\text{smokeja}}=-0.153974$ in einer Stichprobe zu beobachten liegt bei 0.0487 (p-Wert, siehe `Pr(>|t|)`.")
+question("Is the estimate ($\\hat{\\beta}_{\\text{smokeyes}}=-0.153974$) compatible to the model if no effect($H_0: {\\beta}_{\\text{smokeyes}}=0$)?",
+  answer("Yes.", message = "The probability in a model with ${\\beta}_{\\text{smokeyes}}=0$ to get a sample with an estimate as least as large as $\\hat{\\beta}_{\\text{smokeyes}}=|-0.153974|$ is $0.0487$ (p-value`Pr(>|t|)`."),
+  answer("No.", correct = TRUE, message = "The probability in a model with ${\\beta}_{\\text{smokeyes}}=0$ to get a sample with an estimate as least as large as $\\hat{\\beta}_{\\text{smokeyes}}=|-0.153974|$ is $0.0487$ (p-value`Pr(>|t|)`.")
 )
 ```
 
-*Hinweis*: Die Annahme eines linearen Modells ist aufgrund des nicht-linearen Zusammenhangs zwischen age und Größe sowie Größe und fev (siehe Abbildungen im Abschnitt *Das age ...*) eher nur eine Näherung.
+*Note*: The assumption of a linear model is due to the non-linear association between age and height as well as height and forced expiratory volume a questionable approximation.
 
-## Ausblick
 
-Die Kausale Inferenz bietet viele weitere und fortgeschrittene Möglichkeiten der Analyse. Siehe z.B. als Einstieg: Pearl, J., Glymour, M., \& Jewell, N. P. (2016). *Causal inference in statistics: A primer*. John Wiley \& Sons, [http://bayes.cs.ucla.edu/PRIMER/](http://bayes.cs.ucla.edu/PRIMER/).
+## Summary
+
+As Kari Lock Morgan puts it [here](https://askgoodquestions.blog/2020/07/27/56-questioning-causal-evidence/):
+
+> Two key questions [we] should ask and answer when evaluating causal evidence:
+
+>  - Do we have convincing evidence against "just random chance"?  Why or why not?
+
+>  - Do we have convincing evidence against the groups differing to being with?  Why or why not?
+
+For the date in this tutorial the smoking and non-smoking group differ by e.g. age. Therefor the naive comparison was flawed.
+
+The rather low p-value in the parametric hypothesis test of ${\beta}_{\text{smokeyes}}=0$ gives as (weak) evidence against just random chance. 
+
+<br>
+
+**Citation**: Karsten Lübke, Matthias Gehrke, Jörg Horst \& Gero Szepannek (2020) Why We Should Teach Causal Inference: Examples in Linear Regression With Simulated Data, Journal of Statistics Education, 28:2, 133-139, [https://doi.org/10.1080/10691898.2020.1752859](https://doi.org/10.1080/10691898.2020.1752859).
+
+<br>
+
+**Literature** e.g.: Pearl, J., Glymour, M., \& Jewell, N. P. (2016). *Causal inference in statistics: A primer*. John Wiley \& Sons, [http://bayes.cs.ucla.edu/PRIMER/](http://bayes.cs.ucla.edu/PRIMER/).
+
+
