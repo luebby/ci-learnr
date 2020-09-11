@@ -39,9 +39,9 @@ tutorial_options(exercise.timelimit = 60, exercise.checker = checker)
 
 ## Preliminaries
 
-This tutorial is based on [Causal Inference in Introductory Statistics Courses](https://github.com/kfcaby/causalLab) of [LTC Kevin Cummiskey](https://westpoint.edu/mathematical-sciences/profile/kevin_cummiskey), see Cummiskey, K., Adams, B,. Pleuss, J.,  Turner, D., Clark, N. \& Watts, K. (2020). *Causal Inference in Introductory Statistics Courses*, Journal of Statistics Education, [https://doi.org/10.1080/10691898.2020.1713936](https://doi.org/10.1080/10691898.2020.1713936).
+This introductory tutorial is based on [Causal Inference in Introductory Statistics Courses](https://github.com/kfcaby/causalLab), see Cummiskey, K., Adams, B,. Pleuss, J.,  Turner, D., Clark, N. \& Watts, K. (2020). [*Causal Inference in Introductory Statistics Courses*, Journal of Statistics Education, 20(1)](https://doi.org/10.1080/10691898.2020.1713936).
 
-Data is taken from Kahn, M. (2005). *An exhalent problem for teaching statistics*. Journal of Statistics Education, 13(2), [https://doi.org/10.1080/10691898.2005.11910559](https://doi.org/10.1080/10691898.2005.11910559).
+Data is taken from Kahn, M. (2005). [*An exhalent problem for teaching statistics*. Journal of Statistics Education, 13(2)](https://doi.org/10.1080/10691898.2005.11910559).
 
 <br>
 
@@ -56,13 +56,13 @@ Please report any issues [here](https://github.com/luebby/ci-learnr/issues).
 Nowadays we are sure that smoking is harmful. But this was not always clear and a naive data analysis may come to the opposite conclusion. 
 
 
-In a series of papers (e.g. [Kahn, 2005](https://doi.org/10.1080/10691898.2005.11910559)) the question was analyzed if chidlhood smoking has an effect on  *forced expiratory volume*,  common measure of lung function.
+In a series of papers (e.g. [Kahn, 2005](https://doi.org/10.1080/10691898.2005.11910559)) the question was analyzed if childhood smoking has an effect on  *forced expiratory volume*, a common measure of lung function.
 
 ###
 
 
 ```{r ethik, echo=FALSE}
-question("Is it ethical here to conduct a randomized experiment?",
+question("Is it ethical here to conduct a randomized controlled trial?",
   answer("Yes.", message = "Negeative consequences of smoking can be expected."),
   answer("No.", correct = TRUE, message = "Negeative consequences of smoking can be expected.")
 )
@@ -77,7 +77,7 @@ The data set `FEV` has the following structure:
 str(FEV)
 ```
 
-with variables
+with variables:
 
 - `age`: the age of the subject in years
 - `fev`: forced expiratory volume (L)
@@ -101,7 +101,7 @@ question("What is the measurement scale of `fev`?",
 
 ###
 
-The following causal structure is assumed:
+The following causal structure is assumed due to scientific background knowledge:
 
 ```{r p1, echo=FALSE}
 p1
@@ -109,9 +109,10 @@ p1
 
 *Tip*: [DAGitty](http://dagitty.net/) and [ggdag](https://ggdag.netlify.app/) are nice tools for drawing and analyzing directed acyclic graphs.
 
+
 ## Smoking and forced expiratory volume
 
-A boxplot of forced expiratory volume (`fev`) given smoking (`smoke`) gives the following result: 
+A boxplot of forced expiratory volume (`fev`) given smoking (`smoke`) shows the following result: 
 
 ```{r b1}
 gf_boxplot(fev ~ smoke, data = FEV)
@@ -148,9 +149,9 @@ The overall scene has not changed, smokers seem to have a higher forced expirato
 
 Why?
 
-## Age ...
+## Age
 
-Thinking about the data: height is associated with age:
+Thinking about the data: height is associated with age -- especially while growing up:
 
 ```{r }
 gf_point(height ~ age, data = FEV) %>%
@@ -184,6 +185,7 @@ gf_point(fev ~ height, data = FEV) %>%
   gf_smooth()
 ```
 
+
 ## Causal inference 
 
 The assumed causal model of the data generating process is:
@@ -191,7 +193,6 @@ The assumed causal model of the data generating process is:
 ```{r p12, echo = FALSE}
 p1
 ```
-
 
 
 A naive modeling of forced expiratory volume by smoking gives the following result:
@@ -230,7 +231,7 @@ question("Should we adjust also `height`?",
 
 ###
 
-Give a formula which would allow to estimate the total causal effect of smoking on forced expiratory volume under the assumption that a parametric linear model applies: 
+Give a formula which would allow to estimate the total causal effect of smoking on forced expiratory volume under the assumption that a linear model applies: 
 
 ```{r model, exercise = TRUE, eval=FALSE}
 lm(fev ~ smoke + ___ + ___, data = FEV) %>%
@@ -246,21 +247,22 @@ lm(fev ~ smoke + sex + age, data = FEV) %>%
 
 ```{r effekt, echo=FALSE}
 question("Has smoking a negative total causal effect on the forced expiratory volume?",
-  answer("Ja.", correct = TRUE, message = "The estimated coefficient is negative: $-0.153974$ (`Estimate` for `smokeyes`)."),
-  answer("Nein.", message = "The estimated coefficient is negative: $-0.153974$ (`Estimate` for `smokeyes`).")
+  answer("Yes.", correct = TRUE, message = "The estimated coefficient is negative: $-0.153974$ (`Estimate` of `smokeyes`)."),
+  answer("No.", message = "The estimated coefficient is negative: $-0.153974$ (`Estimate` of `smokeyes`).")
 )
 ```
 
 ###
 
 ```{r pwert, echo=FALSE}
-question("Is the estimate ($\\hat{\\beta}_{\\text{smokeyes}}=-0.153974$) compatible to the model if no effect($H_0: {\\beta}_{\\text{smokeyes}}=0$)?",
-  answer("Yes.", message = "The probability in a model with ${\\beta}_{\\text{smokeyes}}=0$ to get a sample with an estimate as least as large as $\\hat{\\beta}_{\\text{smokeyes}}=|-0.153974|$ is $0.0487$ (p-value`Pr(>|t|)`."),
-  answer("No.", correct = TRUE, message = "The probability in a model with ${\\beta}_{\\text{smokeyes}}=0$ to get a sample with an estimate as least as large as $\\hat{\\beta}_{\\text{smokeyes}}=|-0.153974|$ is $0.0487$ (p-value`Pr(>|t|)`.")
+question("Is the estimate ($\\hat{\\beta}_{\\text{smokeyes}}=-0.153974$) compatible to the model of no effect ($H_0: {\\beta}_{\\text{smokeyes}}=0$)?",
+  answer("Yes.", message = "The probability in a model with ${\\beta}_{\\text{smokeyes}}=0$ to get a sample with an estimate as least as large as $\\hat{\\beta}_{\\text{smokeyes}}=|-0.153974|$ is $0.0487$ (p-value `Pr(>|t|)`."),
+  answer("No.", correct = TRUE, message = "The probability in a model with ${\\beta}_{\\text{smokeyes}}=0$ to get a sample with an estimate as least as large as $\\hat{\\beta}_{\\text{smokeyes}}=|-0.153974|$ is $0.0487$ (p-value `Pr(>|t|)`.")
 )
 ```
 
 *Note*: The assumption of a linear model is due to the non-linear association between age and height as well as height and forced expiratory volume a questionable approximation.
+
 
 ### Simulation based inference
 
@@ -286,17 +288,17 @@ As Kari Lock Morgan puts it [here](https://askgoodquestions.blog/2020/07/27/56-q
 
 >  - Do we have convincing evidence against the groups differing to being with?  Why or why not?
 
-For the date in this tutorial the smoking and non-smoking group differ by e.g. age. Therefor the naive comparison was flawed.
+For the date in this tutorial the smoking and non-smoking group differ by e.g. age. Therefor the naive comparison (without adjusting) was flawed.
 
-The rather low p-value in the hypothesis test of ${\beta}_{\text{smokeyes}}=0$ gives us a (weak) evidence against just random chance. 
+The low p-value in the hypothesis test of ${\beta}_{\text{smokeyes}}=0$ gives us (weak) evidence against that the difference was just due to random chance. 
 
 <br>
 
-With this tutorial we try to motivate to consider bias and confounding in analysing causal effects. More advanced and non-parametric methods exists. For a start see e.g.: Pearl, J., Glymour, M., \& Jewell, N. P. (2016). *Causal inference in statistics: A primer*. John Wiley \& Sons, [http://bayes.cs.ucla.edu/PRIMER/](http://bayes.cs.ucla.edu/PRIMER/).
+With this tutorial we try to motivate you to consider bias and confounding in analyzing causal effects. More advanced and non-parametric methods exists. See for a start e.g.: Pearl, J., Glymour, M., \& Jewell, N. P. (2016). [*Causal inference in statistics: A primer*](http://bayes.cs.ucla.edu/PRIMER/). John Wiley \& Sons.
 
 
 <br>
 
 **Citation**: Karsten Lübke, Matthias Gehrke, Jörg Horst \& Gero Szepannek (2020) Why We Should Teach Causal Inference: Examples in Linear Regression With Simulated Data, Journal of Statistics Education, 28:2, 133-139, [https://doi.org/10.1080/10691898.2020.1752859](https://doi.org/10.1080/10691898.2020.1752859).
 
-
+*Source*: [https://github.com/luebby/ci-learnr/](https://github.com/luebby/ci-learnr/)
