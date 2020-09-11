@@ -47,6 +47,10 @@ Data is taken from Kahn, M. (2005). *An exhalent problem for teaching statistics
 
 *Note*: The R packages [mosaic](https://projectmosaic.github.io/mosaic/) with [ggformula](https://projectmosaic.github.io/ggformula/) are used for data analysis.
 
+<br>
+
+Please report any issues [here](https://github.com/luebby/ci-learnr/issues).
+
 ## Youth smoking
 
 Nowadays we are sure that smoking is harmful. But this was not always clear and a naive data analysis may come to the opposite conclusion. 
@@ -105,9 +109,9 @@ p1
 
 *Tip*: [DAGitty](http://dagitty.net/) and [ggdag](https://ggdag.netlify.app/) are nice tools for drawing and analyzing directed acyclic graphs.
 
-## Rauchen und fev
+## Smoking and forced expiratory volume
 
-Ein Boxplot des fevs in Abhängigkeit des Rauchverhaltens ergibt folgendes Ergebnis:
+A boxplot of forced expiratory volume (`fev`) given smoking (`smoke`) gives the following result: 
 
 ```{r b1}
 gf_boxplot(fev ~ smoke, data = FEV)
@@ -116,17 +120,17 @@ gf_boxplot(fev ~ smoke, data = FEV)
 ###
 
 ```{r median, echo=FALSE}
-question("Welche Gruppe hat im Median das größere fev?",
-  answer("Die Nichtraucher.", message = "Falsch: während der Median bei den Nichtraucher\\*innen bei ca. 2.5 l liegt, liegt er bei den Raucher\\*innen bei ca. 3.2 l."),
-  answer("Die Raucher.", correct = TRUE, message = "Richtig: während der Median bei den Nichtraucher\\*innen bei ca. 2.5 l liegt, liegt er bei den Raucher\\*innen bei ca. 3.2 l.")
+question("Which group has the higher median of `fev`?",
+  answer("Non-smoker", message = "The median fev of non-smokers is $\\approx 2.5$ l, whereas for smokers it is $\\approx 3.2$  l."),
+  answer("Smoker.", correct = TRUE, message = "The median fev of non-smokers is $\\approx 2.5$ l, whereas for smokers it is $\\approx 3.2$ l.")
 )
 ```
 
 ###
 
-Sowohl Rauchen als auch fev hängen vom sex ab. 
+Smoking and forced expiratory volume depend on sex.
 
-Erweitern Sie den Code, so dass Sie nach `sex` bedingen/ filtern.
+Expand the code so that you can also condition on `sex`.
 
 ```{r bedingt, exercise = TRUE}
 gf_boxplot(fev ~ smoke, data = FEV)
@@ -138,13 +142,13 @@ gf_boxplot(fev ~ smoke | sex, data = FEV)
 
 ###
 
-Das Bild hat sich nicht geändert, Raucher\*innen scheinen das größere fev zu haben.
+The overall scene has not changed, smokers seem to have a higher forced expiratory volume.
 
 ###
 
-Woran könnte das liegen?
+Why?
 
-## Das age ...
+## Age ...
 
 Wie zu erwarten war, gibt es einen Zusammenhang zwischen age und Größe:
 
