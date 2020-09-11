@@ -288,14 +288,15 @@ As Kari Lock Morgan puts it [here](https://askgoodquestions.blog/2020/07/27/56-q
 
 For the date in this tutorial the smoking and non-smoking group differ by e.g. age. Therefor the naive comparison was flawed.
 
-The rather low p-value in the hypothesis test of ${\beta}_{\text{smokeyes}}=0$ gives as (weak) evidence against just random chance. 
+The rather low p-value in the hypothesis test of ${\beta}_{\text{smokeyes}}=0$ gives us a (weak) evidence against just random chance. 
+
+<br>
+
+With this tutorial we try to motivate to consider bias and confounding in analysing causal effects. More advanced and non-parametric methods exists. For a start see e.g.: Pearl, J., Glymour, M., \& Jewell, N. P. (2016). *Causal inference in statistics: A primer*. John Wiley \& Sons, [http://bayes.cs.ucla.edu/PRIMER/](http://bayes.cs.ucla.edu/PRIMER/).
+
 
 <br>
 
 **Citation**: Karsten Lübke, Matthias Gehrke, Jörg Horst \& Gero Szepannek (2020) Why We Should Teach Causal Inference: Examples in Linear Regression With Simulated Data, Journal of Statistics Education, 28:2, 133-139, [https://doi.org/10.1080/10691898.2020.1752859](https://doi.org/10.1080/10691898.2020.1752859).
-
-<br>
-
-**Literature** e.g.: Pearl, J., Glymour, M., \& Jewell, N. P. (2016). *Causal inference in statistics: A primer*. John Wiley \& Sons, [http://bayes.cs.ucla.edu/PRIMER/](http://bayes.cs.ucla.edu/PRIMER/).
 
 
