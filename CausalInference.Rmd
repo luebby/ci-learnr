@@ -62,9 +62,9 @@ In a series of papers (e.g. [Kahn, 2005](https://doi.org/10.1080/10691898.2005.1
 
 
 ```{r ethik, echo=FALSE}
-question("Is it ethical here to conduct a randomized controlled trial?",
-  answer("Yes.", message = "Negeative consequences of smoking can be expected."),
-  answer("No.", correct = TRUE, message = "Negeative consequences of smoking can be expected.")
+question("Is it ethical in this case to conduct a randomized controlled trial?",
+  answer("Yes.", message = "Negative consequences of smoking can be expected."),
+  answer("No.", correct = TRUE, message = "Negative consequences of smoking can be expected.")
 )
 ```
 
@@ -80,7 +80,7 @@ str(FEV)
 with variables:
 
 - `age`: the age of the subject in years
-- `fev`: forced expiratory volume (L)
+- `fev`: forced expiratory volume (l)
 - `height`: the height of the subject in inches
 - `sex`: biological sex of the subject
 - `smoke`: whether the subject had ever smoked or no
@@ -92,16 +92,16 @@ head(FEV)
 
 ```{r skalennvieau, echo=FALSE}
 question("What is the measurement scale of `fev`?",
-  answer("Nominal", message = "Values can be distinguished, ordered and differences as well as ratios are meaningful."),
-  answer("Ordinal", message = "Values can be distinguished, ordered and differences as well as ratios are meaningful."), 
-    answer("Interval", message = "Values can be distinguished, ordered and differences as well as ratios are meaningful."), 
-    answer("Ratio", correct=TRUE, message = "Values can be distinguished, ordered and differences as well as ratios are meaningful.")
+  answer("Nominal", message = "Values can be distinguished, ordered and as well differences as ratios are meaningful."),
+  answer("Ordinal", message = "Values can be distinguished, ordered and as well differences as ratios are meaningful."), 
+    answer("Interval", message = "Values can be distinguished, ordered and as well differences as ratios are meaningful."), 
+    answer("Ratio", correct=TRUE, message = "Values can be distinguished, ordered and as well differences as ratios are meaningful.")
 )
 ```
 
 ###
 
-The following causal structure is assumed due to scientific background knowledge:
+The following causal structure is assumed according to scientific background knowledge:
 
 ```{r p1, echo=FALSE}
 p1
@@ -129,7 +129,7 @@ question("Which group has the higher median of `fev`?",
 
 ###
 
-Smoking and forced expiratory volume depend on sex.
+Smoking as well as forced expiratory volume depend on sex.
 
 Expand the code so that you can also condition on `sex`.
 
@@ -174,7 +174,7 @@ gf_point(height ~ age, color = ~ smoke, data = FEV) %>%
 
 ###
 
-In childhood smoking: those who smoke are older than than those who don't -- and also taller.
+In childhood smoking: those who smoke are older than those who don't -- and also taller.
 
 ###
 
@@ -218,12 +218,12 @@ and
 
 $$\text{smoke} \leftarrow \text{age} \rightarrow \text{fev}$$
 
-Here age is in the middle of af a *fork*.
+Here age is in the middle of a *fork*.
 
 These paths should be blocked by means of e.g. adjusting.
 
 ```{r chain, echo=FALSE}
-question("Should we adjust also `height`?",
+question("Should we also adjust for `height`?",
   answer("Yes.", message = "`height` is on the causal path between `smoke` and `fev` (Mediator in a *chain*)."),
   answer("No.", correct = TRUE, message = "`height` is on the causal path between `smoke` and `fev` (Mediator in a *chain*).")
 )
@@ -266,7 +266,7 @@ question("Is the estimate ($\\hat{\\beta}_{\\text{smokeyes}}=-0.153974$) compati
 
 ### Simulation based inference
 
-That the observed effect in the data is uncommon if the forced expiratory volume is independent of smoking can also be seen by a permutation test. Simulation based inference, i.e. simulating the distribution of $\hat{\beta}_{\text{smokeyes}}$ while shuffling smoke:
+That the observed effect in the data is uncommon if the forced expiratory volume is independent of smoking can also be seen by a permutation test. For this we can use simulation based inference, i.e. simulating the distribution of $\hat{\beta}_{\text{smokeyes}}$ while shuffling smoke:
 
 ```{r permute, warning=FALSE , exercise = TRUE}
 set.seed(1896)
@@ -288,13 +288,13 @@ As Kari Lock Morgan puts it [here](https://askgoodquestions.blog/2020/07/27/56-q
 
 >  - Do we have convincing evidence against the groups differing to being with?  Why or why not?
 
-For the date in this tutorial the smoking and non-smoking group differ by e.g. age. Therefor the naive comparison (without adjusting) was flawed.
+For the data in this tutorial the smoking and non-smoking group differ by e.g. age. Therefore the naive comparison (without adjusting) was flawed.
 
-The low p-value in the hypothesis test of ${\beta}_{\text{smokeyes}}=0$ gives us (weak) evidence against that the difference was just due to random chance. 
+The low p-value in the hypothesis test of ${\beta}_{\text{smokeyes}}=0$ gives us (weak) evidence against the difference just resulting from random chance. 
 
 <br>
 
-With this tutorial we try to motivate you to consider bias and confounding in analyzing causal effects. More advanced and non-parametric methods exists. See for a start e.g.: Pearl, J., Glymour, M., \& Jewell, N. P. (2016). [*Causal inference in statistics: A primer*](http://bayes.cs.ucla.edu/PRIMER/). John Wiley \& Sons.
+With this tutorial we try to motivate you to consider bias and confounding in analyzing causal effects. More advanced and non-parametric methods exist. See for a start e.g.: Pearl, J., Glymour, M., \& Jewell, N. P. (2016). [*Causal inference in statistics: A primer*](http://bayes.cs.ucla.edu/PRIMER/). John Wiley \& Sons.
 
 
 <br>
