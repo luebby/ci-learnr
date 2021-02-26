@@ -292,9 +292,7 @@ For the data in this tutorial the smoking and non-smoking group differ by e.g. a
 
 The low p-value in the hypothesis test of ${\beta}_{\text{smokeyes}}=0$ gives us (weak) evidence against the difference just resulting from random chance. 
 
-<br>
 
-With this tutorial we try to motivate you to consider bias and confounding in analyzing causal effects. More advanced and non-parametric methods exist. See for a start e.g.: Pearl, J., Glymour, M., \& Jewell, N. P. (2016). [*Causal inference in statistics: A primer*](http://bayes.cs.ucla.edu/PRIMER/). John Wiley \& Sons.
 
 
 <br>
@@ -302,3 +300,59 @@ With this tutorial we try to motivate you to consider bias and confounding in an
 **Citation**: Karsten Lübke, Matthias Gehrke, Jörg Horst \& Gero Szepannek (2020) Why We Should Teach Causal Inference: Examples in Linear Regression With Simulated Data, Journal of Statistics Education, 28:2, 133-139, [https://doi.org/10.1080/10691898.2020.1752859](https://doi.org/10.1080/10691898.2020.1752859).
 
 *Source*: [https://github.com/luebby/ci-learnr/](https://github.com/luebby/ci-learnr/)
+
+
+## Background
+
+### Levels of causal inference
+
+[Pearl (2019)](https://doi.org/10.1145/3241036) establishes a three-level hierarchy:
+
+- **Association**: $P(y|x)$: Seeing: *what is?*, i.e., the probability of $Y=y$ given that we observe $X=x$.
+
+- **Intervention**: $P(y|do(x))$: Manipulation: *what if?*, i.e., the probability of $Y=y$ given that we intervene and set the value of $X$ to $x$.
+
+- **Counterfactuals**: $P(y_x|x',y')$: Imagining: *what if I had acted differently?*, i.e., the probability of $Y=y$ if $X$ had been $x$ given that we actually observed $x',y'$.
+
+<br>
+
+Other approaches to causal inference are e.g. within potential outcome framework, instrumental variables, regression discontinuity designs, Granger, natural experiments, ...
+
+Compare also Cornfield's conditions and Bradford Hill criteria.
+
+### Basic Elements of a DAG
+
+- $X \rightarrow Y: \quad Y=f(X, U_Y)$ with some function $f(\cdot)$ and some exogenous $U$. 
+
+- The value of $Y$ depends on $X$ - but the value of $X$ **not** on $Y$. 
+
+- Causally there is no inverse function $f^{-1}(\cdot)$. My weight growths with my height but unfortunately my height not with my weight.
+
+<br>
+
+
+
+| Path                       | $X \rightarrow C \rightarrow Y$ | $X \leftarrow C \rightarrow Y$ | $X \rightarrow C \leftarrow Y$ 
+| ---------------------------|---------------------------------|--------------------------------|------------------------------|
+| Name                       | Chain                           | Fork                           | Collider         
+| Association $X$ to $Y$     | Causal                          | Non-causal                     | None                       
+| Role of $C$                | Mediator                        | Cause                          | Effect
+| Adjusting $C$              | Blocks causal path              | Blocks non-causal path         | Opens biasing path
+
+
+<br>
+
+**Idea**: To estimate the change in $y$ if $x$ is changed: Block non-causal paths, open causal paths and don't open a biasing path.
+
+*Tip*: [DAGitty](http://dagitty.net/) is a nice browser-based environment for creating, editing, and analyzing causal diagrams (directed acyclic graphs). See [Ankan et al. (2021)](https://doi.org/10.1002/cpz1.45).
+
+
+## Learning more
+
+With this tutorial we try to motivate you to consider bias and confounding in analyzing (causal) effects. More advanced and non-parametric methods exist. See for a start e.g.: 
+
+- Cinelli, C., Forney, A., Pearl, J. (2020). [*A Crash Course in Good and Bad Controls*](https://ftp.cs.ucla.edu/pub/stat_ser/r493.pdf)
+- Dablander, F. (2020). [*An Introduction to Causal Inference*](https://doi.org/10.31234/osf.io/b3fkw)
+- Pearl, J., Glymour, M., \& Jewell, N. P. (2016). [*Causal inference in statistics: A primer*](http://bayes.cs.ucla.edu/PRIMER/)
+- Rohrer,  J. (2018). [*Thinking Clearly About Correlations and Causation: Graphical Causal Models for Observational Data*](https://doi.org/10.1177%2F2515245917745629)
+
