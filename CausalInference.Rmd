@@ -254,7 +254,7 @@ question("Has smoking a negative total causal effect on the forced expiratory vo
 
 ###
 
-```{r pwert, echo=FALSE}
+```{r pvalue, echo=FALSE}
 question("Is the estimate ($\\hat{\\beta}_{\\text{smokeyes}}=-0.153974$) compatible to the model of no effect ($H_0: {\\beta}_{\\text{smokeyes}}=0$)?",
   answer("Yes.", message = "The probability in a model with ${\\beta}_{\\text{smokeyes}}=0$ to get a sample with an estimate as least as large as $\\hat{\\beta}_{\\text{smokeyes}}=|-0.153974|$ is $0.0487$ (p-value `Pr(>|t|)`."),
   answer("No.", correct = TRUE, message = "The probability in a model with ${\\beta}_{\\text{smokeyes}}=0$ to get a sample with an estimate as least as large as $\\hat{\\beta}_{\\text{smokeyes}}=|-0.153974|$ is $0.0487$ (p-value `Pr(>|t|)`.")
@@ -346,6 +346,75 @@ Compare also Cornfield's conditions and Bradford Hill criteria.
 
 *Tip*: [DAGitty](http://dagitty.net/) is a nice browser-based environment for creating, editing, and analyzing causal diagrams (directed acyclic graphs). See [Ankan et al. (2021)](https://doi.org/10.1002/cpz1.45).
 
+## Outlook: Testable implications
+
+The assumed causal structure of the data generating process implies some (condtional) independencies:
+
+```{r p1indep, echo=FALSE}
+p1
+```
+
+Here:
+
+- Age independent of sex: $\texttt{age}{\perp\!\!\!\perp}\texttt{sex}$
+- fev independent of age, conditional on height, sex and smoke: $\texttt{fev}{\perp\!\!\!\perp}\texttt{age}|\texttt{height}, \texttt{sex}, \texttt{smoke}$
+- height independent of smoke, given age and sex: $\texttt{height}{\perp\!\!\!\perp}\texttt{smoke}|\texttt{age}, \texttt{sex}$
+
+### Worked example
+
+As an example we test 
+
+$$H_0: \texttt{height}{\perp\!\!\!\perp}\texttt{smoke}|\texttt{age}, \texttt{sex}$$
+
+
+Again we assume a linear model and do a permutation test:
+
+```{r permuteindep, warning=FALSE , exercise = TRUE}
+lm(height ~ smoke + sex + age, data = FEV)
+
+set.seed(1896)
+
+Nulldist <- do(1000) * lm(height ~ shuffle(smoke) + sex + age, data = FEV)
+
+gf_histogram( ~ smokeyes, data = Nulldist, center = 0, bins = 21) %>%
+  gf_vline(xintercept =  -0.6404)
+```
+
+```{r pvalueci, echo=FALSE}
+question("Is the estimate ($\\hat{\\beta}_{\\text{smokeyes}}=-0.6404$) (very) incompatible to the model of no conditional association?",
+  answer("Yes.", message = "The estimated coefficient is not extreme if there would be no conditional association."),
+  answer("No.", correct = TRUE, message = "The estimated coefficient is not extreme if there would be no conditional association.")
+)
+```
+
+
+### Partial correlation tests
+
+[DAGitty](http://dagitty.net/) returns Minimal sufficient adjustment sets for a given graph as well as an R code for testable implications via `ggm::pcor.test()`:
+
+```{r pcor}
+# Convert (binary) categorical variables into logical variables
+FEV2 <- FEV %>%
+  mutate(smoke = (smoke=="yes")) %>%
+  mutate(sex = (sex == "female"))
+
+# R Code of http://dagitty.net/
+testImplications <- function( covariance.matrix, sample.size ){
+  library(ggm)
+  tst <- function(i){ pcor.test( pcor(i,covariance.matrix), length(i)-2, sample.size )$pvalue }
+  tos <- function(i){ paste(i,collapse=" ") }
+  implications <- list(c("age","sex"),
+                       c("age","fev","height","smoke","sex"),
+                       c("height","smoke","age","sex"))
+  data.frame( implication=unlist(lapply(implications,tos)),
+              pvalue=unlist( lapply( implications, tst ) ) )
+}
+
+testImplications( covariance.matrix = cov(FEV2), 
+                 sample.size= nrow(FEV2) )
+```
+
+So the $H_0: \texttt{fev}{\perp\!\!\!\perp}\texttt{age}|\texttt{height}, \texttt{sex}, \texttt{smoke}$ would be rejected and the model should be refined!
 
 ## Learning more
 
