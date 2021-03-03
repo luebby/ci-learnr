@@ -19,6 +19,8 @@ dagLV <- dagify(height ~ sex + age + smoke,
                 outcome = "fev")
 p1 <- ggdag(dagLV, text_col = "blue", node = FALSE, text_size = 5) + theme_dag_blank()
 
+library(BiocManager)
+options(repos = BiocManager::repositories())
 
 library(learnr)
 library(tidyverse)
