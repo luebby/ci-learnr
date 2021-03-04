@@ -355,7 +355,7 @@ Compare also Cornfield's conditions and Bradford Hill criteria.
 
 ## Appendix: Testable implications
 
-The assumed causal structure of the data generating process implies some (condtional) independencies:
+The assumed causal structure of the data generating process implies some (conditional) independencies:
 
 ```{r p1indep, echo=FALSE}
 p1
@@ -369,7 +369,7 @@ Here:
 
 ### Partial correlation tests
 
-[DAGitty](http://dagitty.net/) returns minimal sufficient adjustment sets for a given graph as well as a R code for testable implications via `ggm::pcor.test()`:
+[DAGitty](http://dagitty.net/) returns additional to minimal sufficient adjustment sets for a given graph the R code for testable implications with `ggm::pcor.test()`:
 
 ```{r pcor}
 # Convert (binary) categorical variables into logical variables
@@ -377,7 +377,7 @@ FEV2 <- FEV %>%
   mutate(smoke = (smoke=="yes")) %>%
   mutate(sex = (sex == "female"))
 
-# R Code of http://dagitty.net/
+# R Code snippet from http://dagitty.net/
 testImplications <- function( covariance.matrix, sample.size ){
   library(ggm)
   tst <- function(i){ pcor.test( pcor(i,covariance.matrix), length(i)-2, sample.size )$pvalue }
@@ -393,7 +393,7 @@ testImplications( covariance.matrix = cov(FEV2),
                  sample.size= nrow(FEV2) )
 ```
 
-So $H_0: \texttt{fev}{\perp\!\!\!\perp}\texttt{age}|\texttt{height}, \texttt{sex}, \texttt{smoke}$ would be rejected and the model should be refined!
+So there is a statistical discernible deviation of the partial correlation coefficient from $H_0: \texttt{fev}{\perp\!\!\!\perp}\texttt{age}|\texttt{height}, \texttt{sex}, \texttt{smoke}$ and the model should be refined. For $\texttt{age}{\perp\!\!\!\perp}\texttt{sex}$ and $\texttt{height}{\perp\!\!\!\perp}\texttt{smoke}|\texttt{age}, \texttt{sex}$ there is no statistical discernible deviation in the observed data.
 
 ## Appendix: Learning more
 
