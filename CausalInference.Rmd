@@ -7,6 +7,7 @@ runtime: shiny_prerendered
 ---
 
 ```{r setup, include=FALSE}
+#####################################################################
 library(ggdag)
 coordLV <- list(
   x = c(sex = 0, age = 0, smoke = 1, height = 2, fev = 3),
@@ -18,6 +19,7 @@ dagLV <- dagify(height ~ sex + age + smoke,
                 exposure = "smoke",
                 outcome = "fev")
 p1 <- ggdag(dagLV, text_col = "blue", node = FALSE, text_size = 5) + theme_dag_blank()
+#####################################################################
 
 library(BiocManager)
 options(repos = BiocManager::repositories())
@@ -26,7 +28,8 @@ library(learnr)
 library(tidyverse)
 library(mosaic)
 library(ggm)
-
+library(MatchIt)
+#####################################################################
 
 FEV <- read.table('http://jse.amstat.org/datasets/fev.dat.txt')
 colnames(FEV) <- c("age", "fev", "height", "sex", "smoke")
@@ -35,10 +38,16 @@ FEV <- FEV %>%
   mutate(sex = ifelse(!sex, "female", "male")) %>%
   mutate(smoke = ifelse(!smoke, "no", "yes"))
 
-checker <- function(label, user_code, check_code, envir_result, evaluate_result, ...) {
-  list(message = check_code, correct = TRUE, location = "append")
-}
-tutorial_options(exercise.timelimit = 60, exercise.checker = checker)
+#####################################################################
+# Exact matching
+match.exact <- matchit(smoke ~ age + sex, data = FEV, 
+                       estimand = "ATT",
+                       method = "exact")
+# Construct matched data
+FEV.matched <- match.data(match.exact)
+#####################################################################
+
+tutorial_options(exercise.timelimit = 60)
 ```
 
 ## Preliminaries
@@ -371,7 +380,7 @@ Here:
 
 [DAGitty](http://dagitty.net/) returns additional to minimal sufficient adjustment sets for a given graph the R code for testable implications with `ggm::pcor.test()`:
 
-```{r pcor}
+```{r pcor,  exercise = TRUE}
 # Convert (binary) categorical variables into logical variables
 FEV2 <- FEV %>%
   mutate(smoke = (smoke=="yes")) %>%
@@ -392,8 +401,43 @@ testImplications <- function( covariance.matrix, sample.size ){
 testImplications( covariance.matrix = cov(FEV2), 
                  sample.size= nrow(FEV2) )
 ```
+###
 
 So there is a statistical discernible deviation of the partial correlation coefficient from $H_0: \texttt{fev}{\perp\!\!\!\perp}\texttt{age}|\texttt{height}, \texttt{sex}, \texttt{smoke}$ and the model should be refined. For $\texttt{age}{\perp\!\!\!\perp}\texttt{sex}$ and $\texttt{height}{\perp\!\!\!\perp}\texttt{smoke}|\texttt{age}, \texttt{sex}$ there is no statistical discernible deviation in the observed data.
+
+
+## Appendix: Matching
+
+In the matching approach, observations of smokers and nonsmokers are matched by their `age` and `sex` combination. Weights are assigned so that distribution of age and sex of nonsmokers (*Control*) match those of the smokers (*Treated*).
+
+This can be done by the package [MatchIt](https://cran.r-project.org/package=MatchIt), see [Ho et al. (2011)](https://www.jstatsoft.org/article/view/v042i08).
+
+```{r match, exercise = TRUE}
+library(MatchIt)
+
+# Exact matching
+match.exact <- matchit(smoke ~ age + sex, data = FEV, 
+                       estimand = "ATT",
+                       method = "exact")
+
+# Matching result
+match.exact
+summary(match.exact)
+
+# Construct matched data
+FEV.matched <- match.data(match.exact)
+```
+
+##
+
+After matching the *Average Treatment Effect on Treated (ATT)* can be estimated:
+
+```{r matchreg}
+lm(fev ~ smoke, data = FEV.matched, weights = weights)
+```
+
+Again one can see a negative effect of smoking on the forced expiratory volume.
+
 
 ## Appendix: Learning more
 
